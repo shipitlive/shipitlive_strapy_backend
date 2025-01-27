@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "low_level_design_articles",
+  "info": {
+    "singularName": "low-level-design-article",
+    "pluralName": "low-level-design-articles",
+    "displayName": "low_level_design_article",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "text"
+    },
+    "uml_diagram": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "problem_statement": {
+      "type": "blocks"
+    },
+    "github_url": {
+      "type": "text"
+    },
+    "solution_blog": {
+      "type": "blocks"
+    }
+  }
+}

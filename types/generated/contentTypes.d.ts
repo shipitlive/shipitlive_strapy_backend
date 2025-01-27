@@ -526,6 +526,43 @@ export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
   };
 }
 
+export interface ApiLowLevelDesignArticleLowLevelDesignArticle
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'low_level_design_articles';
+  info: {
+    description: '';
+    displayName: 'low_level_design_article';
+    pluralName: 'low-level-design-articles';
+    singularName: 'low-level-design-article';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    github_url: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::low-level-design-article.low-level-design-article'
+    > &
+      Schema.Attribute.Private;
+    problem_statement: Schema.Attribute.Blocks;
+    publishedAt: Schema.Attribute.DateTime;
+    solution_blog: Schema.Attribute.Blocks;
+    title: Schema.Attribute.Text;
+    uml_diagram: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios',
+      true
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -1040,6 +1077,7 @@ declare module '@strapi/strapi' {
       'api::author.author': ApiAuthorAuthor;
       'api::category.category': ApiCategoryCategory;
       'api::global.global': ApiGlobalGlobal;
+      'api::low-level-design-article.low-level-design-article': ApiLowLevelDesignArticleLowLevelDesignArticle;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
