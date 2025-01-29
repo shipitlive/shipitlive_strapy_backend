@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strapi
+  namespace: strapi
+  labels:
+    app: strapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: strapi
+  template:
+    metadata:
+      labels:
+        app: strapi
+    spec:
+      containers:
+        - name: strapi
+          image: shipitlive/strapy-service:v1
+          ports:
+            - containerPort: 1337
+          env:
+            - name: NODE_ENV
+              value: "production"
+          volumeMounts:
+            - name: strapi-data
+              mountPath: /shipitlive_strapi/public/uploads
+      volumes:
+        - name: strapi-data
+          persistentVolumeClaim:
+            claimName: strapi-pvc
