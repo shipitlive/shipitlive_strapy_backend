@@ -9,7 +9,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
-    - host: strapi.shipitlive.dev # Ensure this is the correct domain
+    - host: admin.shipitlive.dev
       http:
         paths:
           - path: /
