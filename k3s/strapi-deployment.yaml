@@ -20,9 +20,9 @@ spec:
           image: shipitlive/strapy-service:v1
           ports:
             - containerPort: 1337
-          env:
-            - name: NODE_ENV
-              value: "production"
+          envFrom:
+            - secretRef:
+                name: strapi-secret
           volumeMounts:
             - name: strapi-data
               mountPath: /shipitlive_strapi/public/uploads
