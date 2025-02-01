@@ -20,9 +20,69 @@ spec:
           image: shipitlive/strapy-service:v1
           ports:
             - containerPort: 1337
-          envFrom:
-            - secretRef:
-                name: strapi-secret
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: DATABASE_URL
+            - name: DATABASE_CLIENT
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: DATABASE_CLIENT
+            - name: DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: DATABASE_HOST
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: DATABASE_NAME
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: DATABASE_PASSWORD
+            - name: DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: DATABASE_PORT
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: DATABASE_USERNAME
+            - name: DATABASE_SSL
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: DATABASE_SSL
+            - name: HOST
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: HOST
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: JWT_SECRET
+            - name: PORT
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: PORT
+            - name: TRANSFER_TOKEN_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: TRANSFER_TOKEN_SALT
           volumeMounts:
             - name: strapi-data
               mountPath: /shipitlive_strapi/public/uploads
