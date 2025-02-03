@@ -1,12 +1,14 @@
-const path = require("path");
-
 module.exports = ({ env }) => {
-  const client = env("DATABASE_CLIENT", "postgres"); // Set default to postgres
+  const client = env("DATABASE_CLIENT", "postgres");
 
   const connections = {
     postgres: {
       connection: {
-        connectionString: env("DATABASE_URL"), // Use the DATABASE_URL variable
+        host: env("DATABASE_HOST", "postgres-strapi-postgresql"),
+        port: env.int("DATABASE_PORT", 5432),
+        database: env("DATABASE_NAME", "strapi"),
+        user: env("DATABASE_USERNAME", "strapi"),
+        password: env("DATABASE_PASSWORD", "yourpassword"),
         ssl: {
           rejectUnauthorized: false,
         },
