@@ -6,9 +6,9 @@ module.exports = ({ env }) => {
       connection: {
         host: env("DATABASE_HOST", "postgres-strapi-postgresql"),
         port: env.int("DATABASE_PORT", 5432),
-        database: env("DATABASE_NAME", "strapi"),
-        user: env("DATABASE_USERNAME", "strapi"),
-        password: env("DATABASE_PASSWORD", "yourpassword"),
+        database: env("DATABASE_NAME", "shipitlive"),
+        user: env("DATABASE_USERNAME", "shipitlive"),
+        password: env("DATABASE_PASSWORD", "shipitlive"),
         ssl: {
           rejectUnauthorized: false,
         },
