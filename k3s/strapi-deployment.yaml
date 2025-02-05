@@ -18,6 +18,7 @@ spec:
       containers:
         - name: strapi
           image: shipitlive/strapy-service:v1
+          imagePullPolicy: Always  
           ports:
             - containerPort: 1337
           env:
@@ -26,7 +27,7 @@ spec:
             - name: DATABASE_HOST
               value: "147.93.98.21"
             - name: DATABASE_NAME
-              value: "strapi"
+              value: "shipitlive"
             - name: DATABASE_USERNAME
               value: "shipitlive"
             - name: DATABASE_PASSWORD
@@ -35,8 +36,6 @@ spec:
               value: "5432"
             - name: DATABASE_SSL
               value: "false"
-            - name: DATABASE_URL
-              value: "postgresql://shipitlive:shipitlive@147.93.98.21:5432/strapi"
             - name: ADMIN_JWT_SECRET
               value: "x9IEKWH/ove82W3khrrqtw=="
             - name: API_TOKEN_SALT
