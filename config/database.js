@@ -1,5 +1,5 @@
 module.exports = ({ env }) => {
-  const client = env("DATABASE_CLIENT", "postgres");
+  const client = env("DATABASE_CLIENT", "pg");
 
   const connections = {
     postgres: {

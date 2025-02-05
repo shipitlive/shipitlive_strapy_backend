@@ -22,7 +22,7 @@ spec:
             - containerPort: 1337
           env:
             - name: DATABASE_CLIENT
-              value: "postgres"
+              value: "pg"
             - name: DATABASE_HOST
               value: "147.93.98.21"
             - name: DATABASE_NAME
