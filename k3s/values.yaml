@@ -1,0 +1,8 @@
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: shipitlive@gmail.com
+      storage: /data/acme.json
+      httpChallenge:
+        entryPoint: web
+

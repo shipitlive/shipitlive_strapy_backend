@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: strapi-ingress
+  namespace: strapi
+  annotations:
+    kubernetes.io/ingress.class: traefik  # Specify Traefik as the Ingress controller
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # Link to your ClusterIssuer
+spec:
+  tls:
+  - hosts:
+      - shipitlive.dev
+    secretName: my-tls-secret  # The TLS certificate secret
+  rules:
+  - host: shipitlive.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: strapi  # Your Strapi service name
+            port:
+              number: 80  # The port your Strapi service is running on
+
