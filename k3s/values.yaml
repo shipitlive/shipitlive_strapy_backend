@@ -1,8 +1,7 @@
-certificatesResolvers:
-  myresolver:
-    acme:
-      email: shipitlive@gmail.com
-      storage: /data/acme.json
-      httpChallenge:
-        entryPoint: web
+entryPoints:
+  web:
+    address: ":80"  # HTTP entry point
+  websecure:
+    address: ":443"  # HTTPS entry point
+
 
