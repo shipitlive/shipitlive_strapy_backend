@@ -30,7 +30,7 @@ pipeline {
             steps {
                 dir('strapi-project') {
                     sh 'npm install'
-                    sh "npm run strapi export --file $BACKUP_FILE"
+                    sh "npm run strapi export -- --file $BACKUP_FILE"
                 }
             }
         }
