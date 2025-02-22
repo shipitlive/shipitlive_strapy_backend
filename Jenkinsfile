@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        BACKUP_FILE = "${env.WORKSPACE}/$(date +%Y-%m-%d)_strapi.tar.gz"
+        BACKUP_FILE = "${env.WORKSPACE}/${sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()}_strapi.tar.gz"
         GIT_SSH_CREDENTIALS_ID = '3f756e47-9b94-4cf6-a18b-8d8a0ef98657'
         GIT_SOURCE_REPO = 'git@github.com:shipitlive/shipitlive_strapy_backend.git'
         GIT_BACKUP_REPO = 'git@github.com:shipitlive/shipitlive-data-backup.git'
