@@ -27,12 +27,12 @@ pipeline {
         }
 
         stage('Take Backup of Strapi Data') {
-            steps {
+        steps {
                 dir('strapi-project') {
-                    sh 'npm install'
-                    sh "npm run strapi export -- --file $BACKUP_FILE"
-                }
+                sh 'npm install'
+                sh "npm run strapi export -- --file=\"$BACKUP_FILE\""  // ✅ Fix: Wrap path in quotes
             }
+        }
         }
 
         stage('Push Backup to Git') {
