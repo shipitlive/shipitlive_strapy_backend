@@ -8,7 +8,7 @@ data:
   HOST: "0.0.0.0"
   PORT: "1337"
   DATABASE_CLIENT: "postgres"
-  DATABASE_HOST: "postgres.strapi.svc.cluster.local"
+  DATABASE_HOST: "10.43.98.134"
   DATABASE_NAME: "shipitlive"
   DATABASE_PORT: "5432"
   DATABASE_SSL: "false"

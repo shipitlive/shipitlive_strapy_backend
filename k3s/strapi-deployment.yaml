@@ -25,7 +25,7 @@ spec:
                 name: strapi-secret
           volumeMounts:
             - name: strapi-data
-              mountPath: /srv/app
+              mountPath: /opt/app/src
       volumes:
         - name: strapi-data
           persistentVolumeClaim:
