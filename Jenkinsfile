@@ -1,10 +1,10 @@
 pipeline {
     agent {
-        docker {
-            image 'node:18'  // Use a Node.js image with npm pre-installed
-        }
+        label 'nodejs-agent'  // Make sure a Jenkins agent with Node.js exists
     }
-
+    tools {
+        nodejs 'nodejs-jenkins'  // Use the configured Node.js version
+    }
     environment {
         BACKUP_DATE = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
         BACKUP_FILE = "${env.WORKSPACE}/${env.BACKUP_DATE}_strapi.tar.gz"
