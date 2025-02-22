@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:18'  // Use a Node.js image with npm pre-installed
+        }
+    }
 
     environment {
         BACKUP_DATE = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
