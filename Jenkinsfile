@@ -12,6 +12,20 @@ pipeline {
 
     stages {
         stage('Clone Strapi Project') {
+        steps {
+            sshagent(['jenkins']) {  // Use correct Jenkins SSH credentials
+                sh '''
+                if [ -d "strapi-project" ]; then
+                    echo "🛑 strapi-project directory already exists. Deleting it..."
+                    rm -rf strapi-project
+                fi
+                git clone $GIT_SOURCE_REPO strapi-project
+                '''
+            }   
+        }
+        }
+
+        stage('Clone Strapi Project') {
             steps {
                 sshagent(['jenkins']) {  // Use the correct credential ID
                     sh 'git clone $GIT_SOURCE_REPO strapi-project'
