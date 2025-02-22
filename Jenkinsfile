@@ -11,6 +11,7 @@ pipeline {
     }
 
     stages {
+        
         stage('Clone Strapi Project') {
         steps {
             sshagent(['jenkins']) {  // Use correct Jenkins SSH credentials
@@ -21,16 +22,8 @@ pipeline {
                 fi
                 git clone $GIT_SOURCE_REPO strapi-project
                 '''
-            }   
-        }
-        }
-
-        stage('Clone Strapi Project') {
-            steps {
-                sshagent(['jenkins']) {  // Use the correct credential ID
-                    sh 'git clone $GIT_SOURCE_REPO strapi-project'
-                }
             }
+        }
         }
 
         stage('Take Backup of Strapi Data') {
