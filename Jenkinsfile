@@ -1,4 +1,5 @@
 pipeline {
+    agent any  
     tools {
         nodejs 'nodejs-jenkins'  // Use the configured Node.js version
     }
