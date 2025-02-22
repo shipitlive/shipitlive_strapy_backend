@@ -28,12 +28,18 @@ pipeline {
 
         stage('Take Backup of Strapi Data') {
         steps {
-                dir('strapi-project') {
+            dir('strapi-project') {
                 sh 'npm install'
-                sh "npm run strapi export -- --file=\"$BACKUP_FILE\""  // ✅ Fix: Wrap path in quotes
+                sh '''
+                # Extract first APP_KEY from Kubernetes secret
+                export STRAPI_ENCRYPTION_KEY=$(kubectl get secret strapi-secret -n strapi -o jsonpath="{.data.APP_KEYS}" | base64 --decode | cut -d ',' -f1)
+
+                # Run the Strapi export command
+                npm run strapi export -- --file="$BACKUP_FILE"
+                '''
             }
         }
-        }
+    }
 
         stage('Push Backup to Git') {
             steps {
