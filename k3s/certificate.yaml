@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: my-tls-cert
+  namespace: strapi  # Or any other namespace where your app is running
+spec:
+  secretName: my-tls-secret  # The TLS secret that will store the certificate
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - admin.shipitlive.dev
+

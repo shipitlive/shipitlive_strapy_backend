@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: strapi
   namespace: strapi
-  labels:
-    app: strapi
 spec:
   replicas: 1
   selector:
@@ -17,40 +15,19 @@ spec:
     spec:
       containers:
         - name: strapi
-          image: shipitlive/strapy-service:v1
-          imagePullPolicy: Always  
+          image: shipitlive/strapi-service:v1
           ports:
             - containerPort: 1337
-          env:
-            - name: DATABASE_CLIENT
-              value: "pg"
-            - name: DATABASE_HOST
-              value: "147.93.98.21"
-            - name: DATABASE_NAME
-              value: "shipitlive"
-            - name: DATABASE_USERNAME
-              value: "shipitlive"
-            - name: DATABASE_PASSWORD
-              value: "shipitlive"
-            - name: DATABASE_PORT
-              value: "5432"
-            - name: DATABASE_SSL
-              value: "false"
-            - name: ADMIN_JWT_SECRET
-              value: "x9IEKWH/ove82W3khrrqtw=="
-            - name: API_TOKEN_SALT
-              value: "P5hg6B08TXYTsKjAyOKkcQ=="
-            - name: APP_KEYS
-              value: "g1BU3h6cSfUFMCzQjbcQOQ==,5b2p71623Nwv5VQZKWf18g==,0+rJQkLKf6/Mbr8mlreZHA==,hfnp5fGxVKEsVEB8dkiqpA=="
-            - name: JWT_SECRET
-              value: "qI8xOj8O92CyRtAhellxrg=="
-            - name: TRANSFER_TOKEN_SALT
-              value: "t7L+h3f0ast3KauA5Y++sg=="
-
+          envFrom:
+            - configMapRef:
+                name: strapi-config
+            - secretRef:
+                name: strapi-secret
           volumeMounts:
             - name: strapi-data
-              mountPath: /shipitlive_strapi/public/uploads
+              mountPath: /opt/app/src
       volumes:
         - name: strapi-data
           persistentVolumeClaim:
             claimName: strapi-pvc
+

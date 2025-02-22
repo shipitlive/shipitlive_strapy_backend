@@ -4,12 +4,12 @@ metadata:
   name: letsencrypt-prod
 spec:
   acme:
+    email: shipitlive@gmail.com  # Change this to your email
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: shipitlive@gmail.com
     privateKeySecretRef:
-      name: letsencrypt-prod
+      name: letsencrypt-prod-secret
     solvers:
-      - http01:
-          ingress:
-            class: traefik
+    - http01:
+        ingress:
+          class: traefik  # Change this if using a different ingress
 
