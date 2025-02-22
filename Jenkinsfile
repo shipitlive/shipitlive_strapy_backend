@@ -30,16 +30,13 @@ pipeline {
         steps {
             dir('strapi-project') {
                 sh 'npm install'
-                sh '''
-                # Hardcoded Strapi Encryption Key (Replace later with a secret mount)
-                export STRAPI_ENCRYPTION_KEY="g1BU3h6cSfUFMCzQjbcQOQ=="
-
-                # Run the Strapi export command with encryption
-                npm run strapi export -- --file="$BACKUP_FILE"
-                '''
+                sh "npm run strapi export -- --no-encrypt --file=\"$BACKUP_FILE\""
             }
         }
     }
+
+
+
 
 
         stage('Push Backup to Git') {
