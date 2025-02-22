@@ -1,6 +1,6 @@
 pipeline {
     tools {
-        nodejs 'NodeJS 20.0.0'  // Use the configured Node.js version
+        nodejs 'nodejs-jenkins'  // Use the configured Node.js version
     }
     environment {
         BACKUP_DATE = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
