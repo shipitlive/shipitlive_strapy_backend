@@ -1,9 +1,6 @@
 pipeline {
-    agent {
-        label 'nodejs-agent'  // Make sure a Jenkins agent with Node.js exists
-    }
     tools {
-        nodejs 'nodejs-jenkins'  // Use the configured Node.js version
+        nodejs 'NodeJS 20.0.0'  // Use the configured Node.js version
     }
     environment {
         BACKUP_DATE = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
