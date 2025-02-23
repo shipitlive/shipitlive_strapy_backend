@@ -21,7 +21,7 @@ pipeline {
 
         stage('Clone Strapi Project') {
             steps {
-                sshagent(['jenkins']) {  // Use correct Jenkins SSH credentials
+                sshagent(['jenkins']) {
                     sh '''
                     if [ -d "strapi-project" ]; then
                         echo "🛑 strapi-project directory already exists. Deleting it..."
@@ -33,27 +33,20 @@ pipeline {
             }
         }
 
-        stage('Inject Environment Variables') {
-            steps {
-                withCredentials([file(credentialsId: 'strapi-env', variable: 'STRAPI_ENV_FILE')]) {
-                    sh '''
-                    echo "✅ Injecting environment variables..."
-                    cp $STRAPI_ENV_FILE strapi-project/.env
-                    '''
-                }
-            }
-        }
-
         stage('Take Backup of Strapi Data') {
             steps {
                 dir('strapi-project') {
                     sh '''
                     echo "✅ Running npm install..."
                     npm install
-                    echo "✅ Sourcing environment variables..."
-                    set -a  # Automatically export variables
-                    . .env  # Source the .env file
-                    set +a
+                    
+                    echo "✅ Exporting environment variables..."
+                    printenv | grep -E 'APP_KEYS|HOST|JWT_SECRET|PORT|TRANSFER_TOKEN_SALT|API_TOKEN_SALT|ADMIN_JWT_SECRET|DATABASE_HOST|DATABASE_PORT|DATABASE_NAME|DATABASE_USERNAME|DATABASE_PASSWORD|NODE_ENV|DATABASE_CLIENT' | while read line; do
+                        echo "export $line" >> strapi-env.sh
+                    done
+                    chmod +x strapi-env.sh
+                    . ./strapi-env.sh
+
                     echo "✅ Starting Strapi export..."
                     npm run strapi export -- --no-encrypt --file="$BACKUP_FILE"
                     '''
@@ -63,7 +56,7 @@ pipeline {
 
         stage('Push Backup to Git') {
             steps {
-                sshagent(['jenkins']) {  // Use the correct credential ID
+                sshagent(['jenkins']) {
                     sh '''
                     mkdir -p backup-repo
                     cd backup-repo
@@ -79,7 +72,7 @@ pipeline {
 
         stage('Cleanup') {
             steps {
-                sh 'rm -rf strapi-project backup-repo $BACKUP_FILE'
+                sh 'rm -rf strapi-project backup-repo $BACKUP_FILE strapi-env.sh'
             }
         }
     }
