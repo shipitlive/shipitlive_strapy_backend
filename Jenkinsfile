@@ -61,13 +61,33 @@ pipeline {
             if [ -d "backup-repo/.git" ]; then
                 echo "✅ Backup repository already exists. Pulling latest changes..."
                 cd backup-repo
-                git reset --hard
-                git pull origin main
+                
+                # Check if any branch exists
+                if git branch -r | grep origin; then
+                    git reset --hard
+                    git pull origin main || git pull origin master || echo "⚠️ No remote branch found!"
+                else
+                    echo "⚠️ No branches found in the repository. Creating the first commit..."
+                    touch .gitkeep
+                    git add .gitkeep
+                    git commit -m "Initialize repository"
+                    git push origin main || git push origin master
+                fi
+
             else
                 echo "✅ Cloning backup repository..."
                 rm -rf backup-repo  # Clean up any broken directory
                 git clone $GIT_BACKUP_REPO backup-repo
                 cd backup-repo
+                
+                # If the repo is empty, create an initial commit
+                if [ -z "$(ls -A .)" ]; then
+                    echo "⚠️ Empty repository detected. Creating first commit..."
+                    touch .gitkeep
+                    git add .gitkeep
+                    git commit -m "Initialize repository"
+                    git push origin main || git push origin master
+                fi
             fi
 
             echo "✅ Moving backup file into the repository..."
@@ -76,11 +96,12 @@ pipeline {
             echo "✅ Committing and pushing the backup..."
             git add .
             git commit -m "Backup: $(date +%Y-%m-%d)"
-            git push origin main
+            git push origin main || git push origin master
             '''
         }
     }
 }
+
 
 
         stage('Cleanup') {
