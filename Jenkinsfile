@@ -15,15 +15,26 @@ pipeline {
     stages {
 
         stage('Load Strapi Environment Variables') {
-            steps {
-                withCredentials([file(credentialsId: 'strapi-env', variable: 'STRAPI_ENV_FILE')]) {
-                    sh '''
-                    export $(cat $STRAPI_ENV_FILE | xargs)
-                    echo "✅ Strapi environment variables loaded."
-                    '''
-                }
+    steps {
+        withCredentials([file(credentialsId: 'strapi-env', variable: 'STRAPI_ENV_FILE')]) {
+                sh '''
+                echo "✅ Loading Strapi environment variables..."
+                
+                # Ensure correct path handling
+                ENV_FILE_PATH=$(echo $STRAPI_ENV_FILE | sed 's/ /\\\\ /g')
+
+                if [ -f "$ENV_FILE_PATH" ]; then
+                    export $(grep -v '^#' "$ENV_FILE_PATH" | xargs)
+                    echo "✅ Strapi environment variables loaded successfully."
+                else
+                    echo "❌ ERROR: Strapi environment file not found at $ENV_FILE_PATH"
+                    exit 1
+                fi
+                '''
             }
         }
+    }
+
 
         stage('Check Environment Variables') {
             steps {
