@@ -79,7 +79,7 @@ pipeline {
                     fi
 
                     echo "✅ Moving backup file into the repository..."
-                    mv "$WORKSPACE/$BACKUP_FILE" "backup-repo/" || { echo "❌ Backup file not found!"; exit 1; }
+                    mv "$WORKSPACE/$BACKUP_FILE" ./backup-repo/ || { echo "❌ Backup file not found!"; exit 1; }
 
                     cd backup-repo
 
