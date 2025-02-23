@@ -95,6 +95,7 @@ pipeline {
             echo "✅ Moving backup file into the repository..."
             mv "$WORKSPACE/$BACKUP_FILE" "./$BACKUP_FILE"
 
+
             echo "✅ Configuring Git user..."
             git config --local user.name "Jenkins CI"
             git config --local user.email "jenkins@shipitlive.dev"
