@@ -1,8 +1,10 @@
 pipeline {
     agent any  
+
     tools {
         nodejs 'nodejs-jenkins'  // Use the configured Node.js version
     }
+
     environment {
         BACKUP_DATE = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
         BACKUP_FILE = "${env.WORKSPACE}/${env.BACKUP_DATE}_strapi.tar.gz"
@@ -11,42 +13,58 @@ pipeline {
     }
 
     stages {
-        stage('Check Environment Variables') {
-        steps {
-            sh 'printenv | sort'
+
+        stage('Load Strapi Environment Variables') {
+            steps {
+                withCredentials([file(credentialsId: 'strapi-env', variable: 'STRAPI_ENV_FILE')]) {
+                    sh '''
+                    export $(cat $STRAPI_ENV_FILE | xargs)
+                    echo "✅ Strapi environment variables loaded."
+                    '''
+                }
+            }
         }
+
+        stage('Check Environment Variables') {
+            steps {
+                sh 'printenv | sort'
+            }
         }
 
         stage('Clone Strapi Project') {
-        steps {
-            sshagent(['jenkins']) {  // Use correct Jenkins SSH credentials
-                sh '''
-                if [ -d "strapi-project" ]; then
-                    echo "🛑 strapi-project directory already exists. Deleting it..."
-                    rm -rf strapi-project
-                fi
-                git clone $GIT_SOURCE_REPO strapi-project
-                '''
+            steps {
+                sshagent(['jenkins']) {  // Use correct Jenkins SSH credentials
+                    sh '''
+                    if [ -d "strapi-project" ]; then
+                        echo "🛑 strapi-project directory already exists. Deleting it..."
+                        rm -rf strapi-project
+                    fi
+                    git clone $GIT_SOURCE_REPO strapi-project
+                    '''
+                }
             }
-        }
         }
 
         stage('Take Backup of Strapi Data') {
-        steps {
-            dir('strapi-project') {
-                sh 'npm install'
-                sh "npm run strapi export -- --no-encrypt --file=\"$BACKUP_FILE\""
+            steps {
+                dir('strapi-project') {
+                    withCredentials([file(credentialsId: 'strapi-env', variable: 'STRAPI_ENV_FILE')]) {
+                        sh '''
+                        export $(cat $STRAPI_ENV_FILE | xargs)
+                        echo "✅ Running npm install..."
+                        npm install
+                        
+                        echo "✅ Starting Strapi export..."
+                        npm run strapi export -- --no-encrypt --file="$BACKUP_FILE"
+                        '''
+                    }
+                }
             }
         }
-    }
-
-
-
-
 
         stage('Push Backup to Git') {
             steps {
-                sshagent(['your-jenkins-ssh-credential-id']) {  // Use the correct credential ID
+                sshagent(['jenkins']) {  // Use the correct credential ID
                     sh '''
                     mkdir -p backup-repo
                     cd backup-repo
