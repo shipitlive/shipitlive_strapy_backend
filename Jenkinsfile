@@ -13,29 +13,6 @@ pipeline {
     }
 
     stages {
-
-        stage('Load Strapi Environment Variables') {
-    steps {
-        withCredentials([file(credentialsId: 'strapi-env', variable: 'STRAPI_ENV_FILE')]) {
-                sh '''
-                echo "✅ Loading Strapi environment variables..."
-                
-                # Ensure correct path handling
-                ENV_FILE_PATH=$(echo $STRAPI_ENV_FILE | sed 's/ /\\\\ /g')
-
-                if [ -f "$ENV_FILE_PATH" ]; then
-                    export $(grep -v '^#' "$ENV_FILE_PATH" | xargs)
-                    echo "✅ Strapi environment variables loaded successfully."
-                else
-                    echo "❌ ERROR: Strapi environment file not found at $ENV_FILE_PATH"
-                    exit 1
-                fi
-                '''
-            }
-        }
-    }
-
-
         stage('Check Environment Variables') {
             steps {
                 sh 'printenv | sort'
@@ -56,19 +33,30 @@ pipeline {
             }
         }
 
+        stage('Inject Environment Variables') {
+            steps {
+                withCredentials([file(credentialsId: 'strapi-env', variable: 'STRAPI_ENV_FILE')]) {
+                    sh '''
+                    echo "✅ Injecting environment variables..."
+                    cp $STRAPI_ENV_FILE strapi-project/.env
+                    '''
+                }
+            }
+        }
+
         stage('Take Backup of Strapi Data') {
             steps {
                 dir('strapi-project') {
-                    withCredentials([file(credentialsId: 'strapi-env', variable: 'STRAPI_ENV_FILE')]) {
-                        sh '''
-                        export $(cat $STRAPI_ENV_FILE | xargs)
-                        echo "✅ Running npm install..."
-                        npm install
-                        
-                        echo "✅ Starting Strapi export..."
-                        npm run strapi export -- --no-encrypt --file="$BACKUP_FILE"
-                        '''
-                    }
+                    sh '''
+                    echo "✅ Running npm install..."
+                    npm install
+                    echo "✅ Sourcing environment variables..."
+                    set -a  # Automatically export variables
+                    . .env  # Source the .env file
+                    set +a
+                    echo "✅ Starting Strapi export..."
+                    npm run strapi export -- --no-encrypt --file="$BACKUP_FILE"
+                    '''
                 }
             }
         }
