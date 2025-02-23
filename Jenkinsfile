@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         BACKUP_DATE = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
-        BACKUP_FILE = "${BACKUP_DATE}_strapi"
+        BACKUP_FILE = "${BACKUP_DATE}_strapi.tar.gz"
         GIT_SOURCE_REPO = 'git@github.com:shipitlive/shipitlive_strapy_backend.git'
         GIT_BACKUP_REPO = 'git@github.com:shipitlive/shipitlive-data-backup.git'
     }
