@@ -27,7 +27,7 @@ pipeline {
                         echo "🛑 strapi-project directory already exists. Deleting it..."
                         rm -rf strapi-project
                     fi
-                    git clone $GIT_SOURCE_REPO strapi-project
+                    git clone "$GIT_SOURCE_REPO" strapi-project
                     '''
                 }
             }
@@ -37,6 +37,7 @@ pipeline {
             steps {
                 dir('strapi-project') {
                     sh '''
+                    set -e  # Exit on error
                     echo "✅ Running npm install..."
                     npm install
                     
@@ -49,72 +50,66 @@ pipeline {
 
                     echo "✅ Starting Strapi export..."
                     npm run strapi export -- --no-encrypt --file="$BACKUP_FILE"
+
+                    # Fix double .tar.gz issue
+                    if [[ "$BACKUP_FILE" == *.tar.gz.tar.gz ]]; then
+                        mv "$BACKUP_FILE" "${BACKUP_FILE%.tar.gz}"
+                    fi
                     '''
                 }
             }
         }
 
         stage('Push Backup to Git') {
-    steps {
-        sshagent(['jenkins']) {
-            sh '''
-            if [ -d "backup-repo/.git" ]; then
-                echo "✅ Backup repository already exists. Pulling latest changes..."
-                cd backup-repo
-                
-                if git branch -r | grep origin; then
-                    git reset --hard
-                    git pull origin main || git pull origin master || echo "⚠️ No remote branch found!"
-                else
-                    echo "⚠️ No branches found in the repository. Creating the first commit..."
-                    touch .gitkeep
-                    git add .gitkeep
+            steps {
+                sshagent(['jenkins']) {
+                    sh '''
+                    set -e  # Exit on error
+                    if [ -d "backup-repo/.git" ]; then
+                        echo "✅ Backup repository already exists. Pulling latest changes..."
+                        cd backup-repo
+                        
+                        if git branch -r | grep origin; then
+                            git reset --hard
+                            git pull origin main || git pull origin master || echo "⚠️ No remote branch found!"
+                        else
+                            echo "⚠️ No branches found in the repository. Creating the first commit..."
+                            touch .gitkeep
+                            git add .gitkeep
+                            git config --local user.name "Jenkins CI"
+                            git config --local user.email "jenkins@shipitlive.dev"
+                            git commit -m "Initialize repository"
+                            git push origin main || git push origin master
+                        fi
+                    else
+                        echo "✅ Cloning backup repository..."
+                        rm -rf backup-repo
+                        git clone "$GIT_BACKUP_REPO" backup-repo || { echo "❌ Failed to clone repo!"; exit 1; }
+                    fi
+
+                    echo "✅ Moving backup file into the repository..."
+                    mv "$WORKSPACE/$BACKUP_FILE" "backup-repo/$(basename "$BACKUP_FILE")" || { echo "❌ Backup file not found!"; exit 1; }
+
+                    cd backup-repo
+
+                    echo "✅ Configuring Git user..."
                     git config --local user.name "Jenkins CI"
                     git config --local user.email "jenkins@shipitlive.dev"
-                    git commit -m "Initialize repository"
+
+                    echo "✅ Committing and pushing the backup..."
+                    git add .
+                    git commit -m "Backup: $(date +%Y-%m-%d)"
                     git push origin main || git push origin master
-                fi
-
-            else
-                echo "✅ Cloning backup repository..."
-                rm -rf backup-repo
-                git clone $GIT_BACKUP_REPO backup-repo
-                cd backup-repo
-                
-                if [ -z "$(ls -A .)" ]; then
-                    echo "⚠️ Empty repository detected. Creating first commit..."
-                    touch .gitkeep
-                    git add .gitkeep
-                    git config --local user.name "Jenkins CI"
-                    git config --local user.email "jenkins@shipitlive.dev"
-                    git commit -m "Initialize repository"
-                    git push origin main || git push origin master
-                fi
-            fi
-
-            echo "✅ Moving backup file into the repository..."
-            mv "$WORKSPACE/$BACKUP_FILE" "./$BACKUP_FILE"
-
-
-            echo "✅ Configuring Git user..."
-            git config --local user.name "Jenkins CI"
-            git config --local user.email "jenkins@shipitlive.dev"
-
-            echo "✅ Committing and pushing the backup..."
-            git add .
-            git commit -m "Backup: $(date +%Y-%m-%d)"
-            git push origin main || git push origin master
-            '''
+                    '''
+                }
+            }
         }
-    }
-}
-
-
-
 
         stage('Cleanup') {
             steps {
-                sh 'rm -rf strapi-project backup-repo $BACKUP_FILE strapi-env.sh'
+                sh '''
+                rm -rf strapi-project backup-repo "$BACKUP_FILE" strapi-env.sh
+                '''
             }
         }
     }
