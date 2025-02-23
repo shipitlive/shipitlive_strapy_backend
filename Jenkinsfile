@@ -62,7 +62,6 @@ pipeline {
                 echo "✅ Backup repository already exists. Pulling latest changes..."
                 cd backup-repo
                 
-                # Check if any branch exists
                 if git branch -r | grep origin; then
                     git reset --hard
                     git pull origin main || git pull origin master || echo "⚠️ No remote branch found!"
@@ -70,21 +69,24 @@ pipeline {
                     echo "⚠️ No branches found in the repository. Creating the first commit..."
                     touch .gitkeep
                     git add .gitkeep
+                    git config --local user.name "Jenkins CI"
+                    git config --local user.email "jenkins@shipitlive.dev"
                     git commit -m "Initialize repository"
                     git push origin main || git push origin master
                 fi
 
             else
                 echo "✅ Cloning backup repository..."
-                rm -rf backup-repo  # Clean up any broken directory
+                rm -rf backup-repo
                 git clone $GIT_BACKUP_REPO backup-repo
                 cd backup-repo
                 
-                # If the repo is empty, create an initial commit
                 if [ -z "$(ls -A .)" ]; then
                     echo "⚠️ Empty repository detected. Creating first commit..."
                     touch .gitkeep
                     git add .gitkeep
+                    git config --local user.name "Jenkins CI"
+                    git config --local user.email "jenkins@shipitlive.dev"
                     git commit -m "Initialize repository"
                     git push origin main || git push origin master
                 fi
@@ -92,6 +94,10 @@ pipeline {
 
             echo "✅ Moving backup file into the repository..."
             mv "$WORKSPACE/$BACKUP_FILE" "./$BACKUP_FILE"
+
+            echo "✅ Configuring Git user..."
+            git config --local user.name "Jenkins CI"
+            git config --local user.email "jenkins@shipitlive.dev"
 
             echo "✅ Committing and pushing the backup..."
             git add .
@@ -101,6 +107,7 @@ pipeline {
         }
     }
 }
+
 
 
 
