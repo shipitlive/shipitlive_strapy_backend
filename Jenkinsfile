@@ -11,7 +11,12 @@ pipeline {
     }
 
     stages {
-        
+        stage('Check Environment Variables') {
+        steps {
+            sh 'printenv | sort'
+        }
+        }
+
         stage('Clone Strapi Project') {
         steps {
             sshagent(['jenkins']) {  // Use correct Jenkins SSH credentials
