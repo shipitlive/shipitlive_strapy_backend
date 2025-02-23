@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         BACKUP_DATE = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
-        BACKUP_FILE = "${env.WORKSPACE}/${env.BACKUP_DATE}_strapi.tar.gz"
+        BACKUP_FILE = "${env.BACKUP_DATE}_strapi.tar.gz"
         GIT_SOURCE_REPO = 'git@github.com:shipitlive/shipitlive_strapy_backend.git'
         GIT_BACKUP_REPO = 'git@github.com:shipitlive/shipitlive-data-backup.git'
     }
@@ -48,7 +48,7 @@ pipeline {
                     . ./strapi-env.sh
 
                     echo "✅ Starting Strapi export..."
-                    npm run strapi export -- --no-encrypt --file="$BACKUP_FILE"
+                    npm run strapi export -- --no-encrypt --file="$WORKSPACE/$BACKUP_FILE"
                     '''
                 }
             }
@@ -60,10 +60,23 @@ pipeline {
                     sh '''
                     mkdir -p backup-repo
                     cd backup-repo
-                    git clone $GIT_BACKUP_REPO .
-                    mv "$BACKUP_FILE" .
+
+                    # Check if the repository already exists
+                    if [ -d ".git" ]; then
+                        echo "✅ Backup repository already exists. Pulling latest changes..."
+                        git reset --hard
+                        git pull origin main
+                    else
+                        echo "✅ Cloning backup repository..."
+                        git clone $GIT_BACKUP_REPO .
+                    fi
+
+                    echo "✅ Moving backup file into the repository..."
+                    mv "$WORKSPACE/$BACKUP_FILE" "./$BACKUP_FILE"
+
+                    echo "✅ Committing and pushing the backup..."
                     git add .
-                    git commit -m "Backup: $(date +%Y-%m-%d)"
+                    git commit -m "Backup: $BACKUP_DATE"
                     git push origin main
                     '''
                 }
@@ -72,7 +85,7 @@ pipeline {
 
         stage('Cleanup') {
             steps {
-                sh 'rm -rf strapi-project backup-repo $BACKUP_FILE strapi-env.sh'
+                sh 'rm -rf strapi-project backup-repo $WORKSPACE/$BACKUP_FILE strapi-env.sh'
             }
         }
     }
