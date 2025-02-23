@@ -61,7 +61,7 @@ pipeline {
                     mkdir -p backup-repo
                     cd backup-repo
                     git clone $GIT_BACKUP_REPO .
-                    mv $BACKUP_FILE .
+                    mv "$BACKUP_FILE" .
                     git add .
                     git commit -m "Backup: $(date +%Y-%m-%d)"
                     git push origin main
