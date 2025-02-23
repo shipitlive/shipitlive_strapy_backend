@@ -49,12 +49,14 @@ pipeline {
                     . ./strapi-env.sh
 
                     echo "✅ Starting Strapi export..."
-                    npm run strapi export -- --no-encrypt --file="$BACKUP_FILE"
+                    npm run strapi export -- --no-encrypt --file="$WORKSPACE/$BACKUP_FILE"
 
-                    # Fix double .tar.gz issue
-                    if [[ "$BACKUP_FILE" == *.tar.gz.tar.gz ]]; then
-                        mv "$BACKUP_FILE" "${BACKUP_FILE%.tar.gz}"
+                    if [ ! -f "$WORKSPACE/$BACKUP_FILE" ]; then
+                        echo "❌ Backup file was not created!"
+                        exit 1
                     fi
+
+                    echo "✅ Backup created: $WORKSPACE/$BACKUP_FILE"
                     '''
                 }
             }
@@ -68,19 +70,8 @@ pipeline {
                     if [ -d "backup-repo/.git" ]; then
                         echo "✅ Backup repository already exists. Pulling latest changes..."
                         cd backup-repo
-                        
-                        if git branch -r | grep origin; then
-                            git reset --hard
-                            git pull origin main || git pull origin master || echo "⚠️ No remote branch found!"
-                        else
-                            echo "⚠️ No branches found in the repository. Creating the first commit..."
-                            touch .gitkeep
-                            git add .gitkeep
-                            git config --local user.name "Jenkins CI"
-                            git config --local user.email "jenkins@shipitlive.dev"
-                            git commit -m "Initialize repository"
-                            git push origin main || git push origin master
-                        fi
+                        git reset --hard
+                        git pull origin main || git pull origin master || echo "⚠️ No remote branch found!"
                     else
                         echo "✅ Cloning backup repository..."
                         rm -rf backup-repo
@@ -88,7 +79,7 @@ pipeline {
                     fi
 
                     echo "✅ Moving backup file into the repository..."
-                    mv "$WORKSPACE/$BACKUP_FILE" "backup-repo/$(basename "$BACKUP_FILE")" || { echo "❌ Backup file not found!"; exit 1; }
+                    mv "$WORKSPACE/$BACKUP_FILE" "backup-repo/" || { echo "❌ Backup file not found!"; exit 1; }
 
                     cd backup-repo
 
@@ -108,7 +99,9 @@ pipeline {
         stage('Cleanup') {
             steps {
                 sh '''
-                rm -rf strapi-project backup-repo "$BACKUP_FILE" strapi-env.sh
+                echo "🧹 Cleaning up..."
+                rm -rf strapi-project backup-repo "$WORKSPACE/$BACKUP_FILE"
+                echo "✅ Cleanup done."
                 '''
             }
         }
