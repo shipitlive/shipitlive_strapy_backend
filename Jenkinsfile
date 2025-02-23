@@ -63,40 +63,48 @@ pipeline {
         }
 
         stage('Push Backup to Git') {
-            steps {
-                sshagent(['jenkins']) {
-                    sh '''
-                    set -e  # Exit on error
-                    if [ -d "backup-repo/.git" ]; then
-                        echo "✅ Backup repository already exists. Pulling latest changes..."
-                        cd backup-repo
-                        git reset --hard
-                        git pull origin main || git pull origin master || echo "⚠️ No remote branch found!"
-                    else
-                        echo "✅ Cloning backup repository..."
-                        rm -rf backup-repo
-                        git clone "$GIT_BACKUP_REPO" backup-repo || { echo "❌ Failed to clone repo!"; exit 1; }
-                    fi
+    steps {
+        sshagent(['jenkins']) {
+            sh '''
+            set -e  # Exit on error
+            if [ -d "backup-repo/.git" ]; then
+                echo "✅ Backup repository already exists. Pulling latest changes..."
+                cd backup-repo
+                git reset --hard
+                git pull origin main || git pull origin master || echo "⚠️ No remote branch found!"
+                cd ..
+            else
+                echo "✅ Cloning backup repository..."
+                rm -rf backup-repo
+                git clone "$GIT_BACKUP_REPO" backup-repo || { echo "❌ Failed to clone repo!"; exit 1; }
+            fi
 
-                    SAFE_WORKSPACE=$(echo "$WORKSPACE" | sed 's/ /\\ /g')
-                    mv "$SAFE_WORKSPACE/${BACKUP_FILE}" "backup-repo/" 
-                    { echo "❌ Backup file not found!"; exit 1; }
+            echo "🔍 Checking file path before moving..."
+            ls -lah "$WORKSPACE" || { echo "❌ Failed to list workspace files"; exit 1; }
 
+            if [ ! -f "$WORKSPACE/${BACKUP_FILE}" ]; then
+                echo "❌ Backup file was not created!"
+                exit 1
+            fi
 
-                    cd backup-repo
+            echo "✅ Moving backup file into the repository..."
+            mv "$WORKSPACE/${BACKUP_FILE}" "backup-repo/" || { echo "❌ Backup file not found!"; exit 1; }
 
-                    echo "✅ Configuring Git user..."
-                    git config --local user.name "Jenkins CI"
-                    git config --local user.email "jenkins@shipitlive.dev"
+            cd backup-repo
 
-                    echo "✅ Committing and pushing the backup..."
-                    git add .
-                    git commit -m "Backup: $(date +%Y-%m-%d)"
-                    git push origin main || git push origin master
-                    '''
-                }
-            }
+            echo "✅ Configuring Git user..."
+            git config --local user.name "Jenkins CI"
+            git config --local user.email "jenkins@shipitlive.dev"
+
+            echo "✅ Committing and pushing the backup..."
+            git add .
+            git commit -m "Backup: $(date +%Y-%m-%d)"
+            git push origin main || git push origin master
+            '''
         }
+    }
+}
+
 
         stage('Cleanup') {
             steps {
