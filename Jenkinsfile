@@ -78,8 +78,9 @@ pipeline {
                         git clone "$GIT_BACKUP_REPO" backup-repo || { echo "❌ Failed to clone repo!"; exit 1; }
                     fi
 
-                    echo "✅ Moving backup file into the repository..."
-                    mv "$WORKSPACE/${BACKUP_FILE}" "backup-repo/" || { echo "❌ Backup file not found!"; exit 1; }
+                    SAFE_WORKSPACE=$(echo "$WORKSPACE" | sed 's/ /\\ /g')
+                    mv "$SAFE_WORKSPACE/${BACKUP_FILE}" "backup-repo/" 
+                    { echo "❌ Backup file not found!"; exit 1; }
 
 
                     cd backup-repo
